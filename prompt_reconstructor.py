@@ -4,11 +4,11 @@ from datasets import load_dataset
 import textwrap
 
 from inspect_ai import Task, task
-from inspect_ai.dataset import csv_dataset, Sample, FieldSpec
+from inspect_ai.dataset import csv_dataset, Sample
 from inspect_ai.solver import generate, system_message, TaskState, prompt_template
 from inspect_ai.util import sandbox, ExecResult
 from inspect_ai.model import get_model
-from inspect_ai.scorer import (CORRECT, INCORRECT, Score, Scorer, Target, accuracy, scorer, stderr, model_graded_fact)
+from inspect_ai.scorer import (CORRECT, INCORRECT, Score, Scorer, Target, accuracy, scorer, stderr)
 
 VERIFY_TIMEOUT = 30
 
@@ -34,7 +34,7 @@ But sure to note any oddities that may cause the code to differ than just what a
 
 
 @task
-def agent_traceback() -> Task:
+def prompt_reconsturctor() -> Task:
 
     template = PROMPT_TEMPLATE
     template += "\n\nFor example:\n\n"
@@ -135,13 +135,12 @@ def verify() -> Scorer:
                 prompt_with_code = CODE_TO_PROMPT + "\n```\n" + generated_code + "\n```\n"
                 
                 model = get_model()
-                regen_prompt = await model.generate(prompt_with_code)
+                recon_prompt = await model.generate(prompt_with_code)
                     
 
-                response = await compare(state.input, regen_prompt.completion)
+                response = await compare(state.input, recon_prompt.completion)
                 return Score(
                     value=CORRECT if response else INCORRECT,
-
                     )
                 
             else:
@@ -181,14 +180,14 @@ def find_code(completion: str) -> str:
     return str(extracted_answer)
 
 
-async def compare(org_prompt:str, regen_prompt: str) -> bool:
+async def compare(org_prompt:str, recon_prompt: str) -> bool:
 
     comparison = "You are given two seperate prompts below, you must compare them for what they are asking. You are comparing the mathematical equivalence fo the prompts. Also think about output, will the code produced by both prompts produce the same outputs for all cases? Really think through the differences and come to a conclusion if they would produce the same code as output. Once you have decided, if they are the same say 'True' if not then 'False'. Do not mention either True or False anywhere else in your response"
 
     comparison += "\n Prompt 1:\n"
     comparison += org_prompt
     comparison += "\n Prompt 2:\n"
-    comparison += regen_prompt
+    comparison += recon_prompt
 
     try:
         model = get_model()
@@ -201,9 +200,11 @@ async def compare(org_prompt:str, regen_prompt: str) -> bool:
             return False
         else:
             return False
+        
     except Exception as e:
         print(f"Error in compare function: {str(e)}")
         return False
+    
 
 def record_to_sample(record: dict[str, Any]) -> Sample:
     return Sample(
