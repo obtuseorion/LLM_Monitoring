@@ -1,4 +1,6 @@
 # Scheming_LM_monitor_MATS
+IMPORTANT: If you are from MATS, I accidentally pushed a more updated version. It is just a little cleaner, easier to read, and has some added metrics. It also uses a bigger dataset and calculates the accuracy of the prompt reconstructor/ comparison.
+
 Preliminary work on a prompt reconstructor as a monitor for determining LM scheming
 
 
