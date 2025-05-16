@@ -1,4 +1,4 @@
-# Scheming_LLM_monitor
+# Scheming_LLM_Monitor
 
 Preliminary work on a prompt reconstructor as a monitor for determining LM scheming
 
