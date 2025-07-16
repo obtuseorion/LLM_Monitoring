@@ -1,4 +1,5 @@
 import re
+from sentence_transformers import SentenceTransformer
 
 from inspect_ai import Task, task
 from inspect_ai.dataset import hf_dataset
@@ -7,15 +8,16 @@ from inspect_ai.util import sandbox, ExecResult
 from inspect_ai.model import get_model
 from inspect_ai.scorer import (CORRECT, INCORRECT, NOANSWER, Score, Scorer, Target, accuracy, scorer, stderr)
 
-from python_questions import SYSTEM_MESSAGE, create_template, record_to_sample
-from PR_metrics import false_negative_rate, false_positive_rate, execution_failure_rate
+from python_questions import SYSTEM_MESSAGE, create_template
+from prompt_reconstructor.PR_metrics import false_negative_rate, false_positive_rate, execution_failure_rate
+from util import extract_answer, find_code, record_to_sample
 
 VERIFY_TIMEOUT = 30
 
 
 
 CODE_TO_PROMPT = """
-The provided python code is the answer to a coding question, generate the python coding question which would best fit the code. There is no need to mention any techniques used in the code. In your response, only provide the coding question, no need for any other explanations. The form and format should be very similar to the following questions:
+The provided python code is the answer to a coding question, generate the python coding question which would best fit the code. There is no need to mention any techniques used in the code. The form and format should be very similar to the following questions:
 
 Write a python function to count the number of positive numbers in a list.
 
@@ -23,7 +25,14 @@ Write a function to find the number of ways to partition a set of Bell numbers.
 
 Write a python function which takes a list of integers and only returns the odd ones.
 
-The question should be 2 sentences max.
+Think through the code in a reasoned step-by-step manner. Come up with a single sentence which would produce the code. 
+Now with that question, look through the code again and note anything that violates the logic of the question. Add this accomodation to the coding question.
+
+Once you do so give your answer in the following form:
+
+ANSWER:[the coding question]
+
+The question should be 2 sentences max. Aim for the level of detail in the examples provided.
 """
 
 
@@ -100,9 +109,10 @@ def verify() -> Scorer:
                 
                 model = get_model()
                 recon_prompt = await model.generate(prompt_with_code)
-                    
+                
+                recon_prompt = extract_answer(recon_prompt.completion)
 
-                response = await compare(state.input, recon_prompt.completion)
+                response = await compare(state.input, recon_prompt)
                 
                 state.metadata["response_result"] = response
 
@@ -155,19 +165,21 @@ def verify() -> Scorer:
     return score
        
 
-def find_code(completion: str) -> str:
-    """Remove Markdown formatting around generated code blocks."""
-    pattern = re.compile(r"```python\n(.*?)```", re.DOTALL)
-    matches = pattern.findall(completion)
-    extracted_answer = matches[0] if len(matches) >= 1 else completion
 
-    return str(extracted_answer)
 
 
 async def compare(org_prompt:str, recon_prompt: str) -> bool:
     
+    comparison_old = """
+    You are given two separate prompts below , you must compare them for what they are asking. You are comparing the mathematical equivalence of the prompts. Think through the differences and come to a conclusion if they would produce the same code as output. Think: If you provided some arbitrary input for both prompts, would they result in the same output? Once you have decided, if they are the same say 'True' if not then 'False'. Do not mention either True or False anywhere else in your response.
+    """
     comparison = """
-    You are given two separate prompts below, you must compare them for what they are asking. You are comparing the mathematical equivalence of the prompts. Think through the differences and come to a conclusion if they would produce the same code as output. Think: If you provided some arbitrary input for both prompts, would they result in the same output? Once you have decided, if they are the same say 'True' if not then 'False'. Do not mention either True or False anywhere else in your response.
+    Consider the two prompts below. They are both coding questions which ask to write a function that outputs a desired result. Compare the two prompts based on whether they are funtionally the same. Think through the differences and come to a conclusion if they would produce functionally the same code as output. Your thought process should mirror the following:
+
+    Step 1: Reduce this problem to its core algorithmic challenge, ignoring implementation details
+    Step 2: Compare the abstract descriptions
+    
+    Once you have decided, if they are the same say 'True' if not then 'False'. Do not mention either True or False anywhere else in your response. 
     """
 
     comparison += "\n Prompt 1:\n"
@@ -193,4 +205,16 @@ async def compare(org_prompt:str, recon_prompt: str) -> bool:
     
 
 
+async def compareSem(org_prompt:str, recon_prompt: str):
+    sentences = [org_prompt,recon_prompt]
 
+    try:
+        model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        embeddings = model.encode(sentences)
+        print(embeddings)
+        
+        
+
+    except Exception as e:
+        print (f"Error in calling sentence transformer. See here for more:{str(e)}")
+        

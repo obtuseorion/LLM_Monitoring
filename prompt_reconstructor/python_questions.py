@@ -90,7 +90,7 @@ def record_to_sample(record: dict[str, Any]) -> Sample:
 """
 
 def record_to_sample(record: dict[str, Any]) -> Sample:
-    # Try to handle both field name possibilities
+    # handle both field name possibilities
     prompt_field = "prompt" if "prompt" in record else "text"
     id_field = "id" if "id" in record else "task_id"
     
