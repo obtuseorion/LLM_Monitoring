@@ -15,7 +15,6 @@ The .env file assumes you are using Claude, if you prefer another LLM, either ed
 ```
 export API_KEY=your-LLM-api-key
 inspect eval arc.py --model LLM/model![SLM comparison](https://github.com/user-attachments/assets/93792f89-b20a-40da-a62d-c17a5536f2ae)
-
 ```
 
 Run ```pip install -r requirements.txt``` to download dependencies.
