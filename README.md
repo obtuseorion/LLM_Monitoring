@@ -19,7 +19,7 @@ inspect eval arc.py --model LLM/model![SLM comparison](https://github.com/user-a
 
 Run ```pip install -r requirements.txt``` to download dependencies.
 
-To run an eval, navigate to the desired technique and run the following command:
+To run an eval, navigate to the desired method and run the following command:
 ```
 inspect eval task.py
 ```
