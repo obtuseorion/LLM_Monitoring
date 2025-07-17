@@ -1,6 +1,6 @@
-# LLM code generation monitoring technique evals
+# LLM code generation monitoring methods evals
 
-A suite of original LLM monitoring frameworks evaluated via inspect AI. 
+A suite of original LLM monitoring methods, evaluated via inspect AI. 
 Currently:
 
 **Prompt Reconstructor**: Generates a prompt based on the generated code, and this reconstructed prompt is compared to the original prompt. In the case of scheming, the reconstructed prompt would differ from the original prompt.
