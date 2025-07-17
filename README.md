@@ -1,7 +1,11 @@
-# Scheming_LLM_Monitor eval
+# LLM code generation monitoring technique evals
 
-Preliminary work on a prompt reconstructor as a monitor for determining LM scheming
+A suite of original LLM monitoring frameworks evaluated via inspect AI. 
+Currently:
 
+Prompt Reconstructor:
+
+Property-based test generator:
 
 This script uses Inspect AI. Learn more about it here: https://inspect.aisi.org.uk/
 ```
