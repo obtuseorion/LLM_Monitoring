@@ -3,9 +3,9 @@
 A suite of original LLM monitoring frameworks evaluated via inspect AI. 
 Currently:
 
-Prompt Reconstructor: Generates a prompt based on the generated code, and this reconstructed prompt is compared to the original prompt. In the case of scheming, the reconstructed prompt would differ from the original prompt.
+**Prompt Reconstructor**: Generates a prompt based on the generated code, and this reconstructed prompt is compared to the original prompt. In the case of scheming, the reconstructed prompt would differ from the original prompt.
 
-Property-based test generator (Hypothesis testing): Generates property-based unit tests via a RAG pipeline. If the generated unit tests fail, the LLM is determined to be scheming.
+**Property-based test generator (Hypothesis testing)**: Generates property-based unit tests via a RAG pipeline. If the generated unit tests fail, the LLM is determined to be scheming.
 
 This script uses Inspect AI. Learn more about it here: https://inspect.aisi.org.uk/
 ```
